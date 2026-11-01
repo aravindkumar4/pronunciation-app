@@ -1,0 +1,35 @@
+.word {
+            display: inline-block;
+            margin: 4px 6px;
+            padding: 4px 10px;
+            border-radius: 8px;
+            font-size: 1.25rem;
+            font-weight: 500;
+            transition: all 0.3s ease;
+            background-color: #f1f5f9;
+            color: #334155;
+            border: 2px solid #e2e8f0;
+        }
+        .word.correct {
+            background-color: #dcfce7 !important;
+            color: #15803d !important;
+            border-color: #22c55e !important;
+            transform: scale(1.05);
+        }
+        .word.wrong {
+            background-color: #fee2e2 !important;
+            color: #b91c1c !important;
+            border-color: #ef4444 !important;
+        }
+        .word.current {
+            border-color: #3b82f6 !important;
+            box-shadow: 0 0 8px rgba(59, 130, 246, 0.5);
+        }
+        @keyframes pulse-red {
+            0%, 100% { transform: scale(1); opacity: 1; }
+            50% { transform: scale(1.08); opacity: 0.8; }
+        }
+        .mic-active {
+            animation: pulse-red 1.5s infinite;
+            background-color: #ef4444 !important;
+        }

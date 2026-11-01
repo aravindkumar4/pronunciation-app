@@ -1,0 +1,455 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>English Pronunciation Practice - Grade 10</title>
+    <!-- Tailwind CSS for styling -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- FontAwesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="index.css" >
+    <script src="index.js"></script>
+</head>
+<body class="bg-slate-100 min-h-screen font-sans text-slate-800 flex flex-col justify-between">
+
+    <!-- Header Section -->
+    <header class="bg-gradient-to-r from-emerald-600 to-teal-700 text-white py-4 px-6 shadow-md">
+        <div class="max-w-4xl mx-auto flex flex-col sm:flex-row justify-between items-center gap-3">
+            <div class="flex items-center gap-3">
+                <div class="bg-white/20 p-2 rounded-xl">
+                    <i class="fa-solid fa-graduation-cap text-2xl"></i>
+                </div>
+                <div>
+                    <h1 class="text-xl font-bold tracking-wide">PronounceIt - Class 10</h1>
+                    <p class="text-xs text-emerald-100">Improve English Reading & Accent (Indian Context)</p>
+                </div>
+            </div>
+            <div class="bg-white/10 px-4 py-1.5 rounded-full text-sm flex items-center gap-2">
+                <i class="fa-solid fa-book-open text-emerald-200"></i>
+                <span>Paragraph <span id="para-index" class="font-bold text-yellow-300">1</span> of 20</span>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Container -->
+    <main class="max-w-4xl w-full mx-auto p-4 sm:p-6 flex-grow flex flex-col justify-center">
+
+        <!-- Card Container -->
+        <div class="bg-white rounded-3xl shadow-xl border border-slate-200 p-6 sm:p-8 flex flex-col gap-6 relative overflow-hidden">
+            
+            <!-- Mode Badge -->
+            <div class="flex justify-between items-center border-b pb-4">
+                <span id="mode-badge" class="bg-emerald-100 text-emerald-800 text-xs sm:text-sm font-semibold px-3 py-1 rounded-full flex items-center gap-2">
+                    <i class="fa-solid fa-circle-check text-emerald-600"></i> Full Paragraph Mode
+                </span>
+                <span id="score-tracker" class="text-slate-500 text-sm font-medium">
+                    Words Read: <span id="read-count" class="font-bold text-slate-800">0</span> / <span id="total-count">0</span>
+                </span>
+            </div>
+
+            <!-- Speech Display Area -->
+            <div id="text-container" class="min-h-[160px] p-4 bg-slate-50 rounded-2xl border border-slate-200 flex flex-wrap items-center justify-start leading-relaxed select-none">
+                <!-- Words dynamically injected here -->
+            </div>
+
+            <!-- Live Speech Recognition Feedback Bar -->
+            <div class="bg-slate-100 rounded-xl p-3 flex items-center justify-between text-xs sm:text-sm text-slate-600">
+                <div class="flex items-center gap-2 overflow-hidden">
+                    <i class="fa-solid fa-waveform text-slate-400"></i>
+                    <span class="font-medium whitespace-nowrap">Heard:</span>
+                    <span id="live-transcript" class="italic text-slate-700 truncate">Press Microphone and Start Reading...</span>
+                </div>
+                <div id="speech-status" class="flex items-center gap-1.5 text-xs font-semibold text-slate-400">
+                    <span class="w-2 h-2 rounded-full bg-slate-400"></span> Mic Ready
+                </div>
+            </div>
+
+            <!-- Controls Panel -->
+            <div class="flex flex-col sm:flex-row items-center justify-between gap-4 pt-2">
+                
+                <!-- Secondary Controls (Listen & Reset & Shuffle) -->
+                <div class="flex items-center gap-2 w-full sm:w-auto justify-center">
+                    <button id="btn-listen" onclick="speakText()" class="flex-1 sm:flex-none px-4 py-3 bg-amber-500 hover:bg-amber-600 text-white rounded-2xl font-semibold shadow-md transition flex items-center justify-center gap-2 text-sm">
+                        <i class="fa-solid fa-volume-high"></i> Listen
+                    </button>
+                    <button id="btn-reset" onclick="resetParagraph()" class="flex-1 sm:flex-none px-4 py-3 bg-slate-200 hover:bg-slate-300 text-slate-700 rounded-2xl font-semibold transition flex items-center justify-center gap-2 text-sm">
+                        <i class="fa-solid fa-rotate-left"></i> Reset
+                    </button>
+                    <button id="btn-shuffle" onclick="shuffleParagraph()" class="flex-1 sm:flex-none px-4 py-3 bg-slate-200 hover:bg-slate-300 text-slate-700 rounded-2xl font-semibold transition flex items-center justify-center gap-2 text-sm">
+                        <i class="fa-solid fa-shuffle"></i> Shuffle
+                    </button>
+                </div>
+
+                <!-- Primary Action Button (Mic) -->
+                <button id="btn-mic" onclick="toggleRecognition()" class="w-full sm:w-auto px-8 py-3.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-2xl font-bold shadow-lg transition flex items-center justify-center gap-3 text-base">
+                    <i id="mic-icon" class="fa-solid fa-microphone text-lg"></i>
+                    <span id="mic-text">Start Reading</span>
+                </button>
+            </div>
+
+        </div>
+
+        <!-- Success Modal / Card (Hidden by default) -->
+        <div id="success-modal" class="hidden mt-6 bg-emerald-50 border border-emerald-200 rounded-2xl p-6 text-center animate-bounce-short">
+            <div class="w-12 h-12 bg-emerald-500 text-white rounded-full flex items-center justify-center mx-auto mb-3 text-2xl shadow-md">
+                <i class="fa-solid fa-trophy"></i>
+            </div>
+            <h3 class="text-xl font-bold text-emerald-900 mb-1">Excellent Work!</h3>
+            <p class="text-sm text-emerald-700 mb-4">You have correctly pronounced all words in this paragraph.</p>
+            <button onclick="shuffleParagraph()" class="px-6 py-2.5 bg-emerald-600 text-white rounded-xl font-semibold hover:bg-emerald-700 transition">
+                Try Next Paragraph <i class="fa-solid fa-arrow-right ml-1"></i>
+            </button>
+        </div>
+
+    </main>
+
+    <!-- Footer -->
+    <footer class="text-center py-4 text-xs text-slate-400">
+        Designed for Grade 10 Students • Indian English Speech Engine
+    </footer>
+
+    <!-- JavaScript Logic -->
+    <script>
+        // Array of 20 English Paragraphs (Tailored for Class 10 Indian Curriculum level)
+        const paragraphs = [
+            "India is a land of rich cultural heritage, diverse traditions, and vibrant languages. People live together with unity and harmony across all states.",
+            "Science and technology play a vital role in transforming our nation. Modern innovations help us solve complex global challenges efficiently.",
+            "Environmental protection is essential for sustainable survival. Planting more trees and reducing plastic waste helps protect our fragile ecosystem.",
+            "Swami Vivekananda emphasized youth empowerment and moral strength. He inspired millions of young minds to work hard for national progress.",
+            "Dr. APJ Abdul Kalam was a visionary scientist and great leader. He dreamt of turning India into a developed nation through education and technology.",
+            "Digital technology has revolutionized everyday communication. Today, students access online learning materials from every corner of the country.",
+            "Regular physical exercise and healthy nutrition maintain good health. A strong body supports an active mind and improves daily productivity.",
+            "Solar energy provides clean and renewable power for domestic use. Harnessing natural sunlight reduces reliance on harmful fossil fuels.",
+            "The Indian Constitution guarantees fundamental rights to all citizens. It promotes justice, liberty, equality, and fraternity among all communities.",
+            "Forests act as the natural lungs of our planet Earth. They purify polluted air, prevent soil erosion, and shelter wildlife species.",
+            "Reading books expands vocabulary and improves logical thinking. It broadens our perspective and inspires creative ideas in daily life.",
+            "Water conservation is critical for future agricultural growth. Rainwater harvesting helps replenish depleting underground water reservoirs across villages.",
+            "Teamwork and mutual coordination lead to extraordinary achievements. Working together with mutual trust makes difficult tasks manageable and easy.",
+            "Space exploration showcases human curiosity and scientific intelligence. Indian space missions have achieved remarkable victories at minimal costs.",
+            "Time management is the key secret to academic excellence. Prioritizing daily duties helps students achieve goals without unnecessary stress.",
+            "Chandrayaan missions demonstrated advanced engineering and determination. India successfully explored lunar regions with remarkable precision and teamwork.",
+            "Cleanliness and personal hygiene prevent the spread of infectious diseases. Keeping our school surroundings clean promotes better community wellness.",
+            "The Great Himalayas protect our northern borders while regulating climate. Glaciers provide fresh water supply to millions of river systems.",
+            "Artificial Intelligence is transforming industrial operations rapidly. Learning computer programming prepares students for upcoming future career paths.",
+            "Hard work, perseverance, and honesty lead to meaningful personal success. Overcoming early failures builds strong character and self confidence."
+        ];
+
+        // State Variables
+        let currentParaIndex = 0;
+        let words = [];
+        let wordStates = []; // 'pending', 'correct', 'wrong'
+        let isReviewMode = false;
+        let mispronouncedIndices = [];
+        
+        // Speech Recognition Setup
+        const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+        let recognition = null;
+        let isListening = false;
+
+        if (SpeechRecognition) {
+            recognition = new SpeechRecognition();
+            recognition.continuous = true;
+            recognition.interimResults = true;
+            recognition.lang = 'en-IN'; // Indian English Accent
+
+            recognition.onresult = (event) => {
+                let transcript = '';
+                for (let i = event.resultIndex; i < event.results.length; i++) {
+                    transcript += event.results[i][0].transcript + ' ';
+                }
+                document.getElementById('live-transcript').textContent = transcript.trim();
+                processRecognizedText(transcript.toLowerCase().trim());
+            };
+
+            recognition.onerror = (event) => {
+                console.warn('Speech recognition error:', event.error);
+                if (event.error === 'no-speech') {
+                    document.getElementById('live-transcript').textContent = "Listening... Speak clearly into microphone.";
+                }
+            };
+
+            recognition.onend = () => {
+                if (isListening) {
+                    try { recognition.start(); } catch(e) {}
+                } else {
+                    updateMicUI(false);
+                }
+            };
+        } else {
+            alert("Your browser does not support Speech Recognition. Please use Google Chrome or Microsoft Edge.");
+        }
+
+        // Initialize App
+        window.onload = () => {
+            loadParagraph(0);
+        };
+
+        // Load Paragraph into UI
+        function loadParagraph(index) {
+            stopRecognition();
+            currentParaIndex = index;
+            isReviewMode = false;
+            
+            document.getElementById('para-index').textContent = currentParaIndex + 1;
+            document.getElementById('success-modal').classList.add('hidden');
+            document.getElementById('mode-badge').className = "bg-emerald-100 text-emerald-800 text-xs sm:text-sm font-semibold px-3 py-1 rounded-full flex items-center gap-2";
+            document.getElementById('mode-badge').innerHTML = '<i class="fa-solid fa-circle-check text-emerald-600"></i> Full Paragraph Mode';
+
+            const rawText = paragraphs[currentParaIndex];
+            // Split into clean words removing punctuation for matching
+            words = rawText.split(/\s+/);
+            wordStates = new Array(words.length).fill('pending');
+            mispronouncedIndices = [];
+
+            renderWords();
+        }
+
+        // Render Words to DOM
+        function renderWords() {
+            const container = document.getElementById('text-container');
+            container.innerHTML = '';
+
+            let targetIndices = isReviewMode ? mispronouncedIndices : words.map((_, i) => i);
+
+            targetIndices.forEach((idx) => {
+                const wordSpan = document.createElement('span');
+                wordSpan.className = `word ${wordStates[idx]}`;
+                wordSpan.id = `word-${idx}`;
+                wordSpan.textContent = words[idx];
+                
+                // Allow tapping individual word to hear pronunciation
+                wordSpan.title = "Click to listen to word";
+                wordSpan.onclick = () => speakSingleWord(words[idx]);
+
+                container.appendChild(wordSpan);
+            });
+
+            updateScoreTracker();
+        }
+
+        // Update Score Tracker Count
+        function updateScoreTracker() {
+            const correctCount = wordStates.filter(s => s === 'correct').length;
+            document.getElementById('read-count').textContent = correctCount;
+            document.getElementById('total-count').textContent = words.length;
+        }
+
+        // Process Speech Results with Relaxed Fuzzy Matching for Indian Accent
+        function processRecognizedText(transcript) {
+            const spokenWords = transcript.replace(/[^\w\s]/g, '').toLowerCase().split(/\s+/);
+            let targetIndices = isReviewMode ? mispronouncedIndices : words.map((_, i) => i);
+
+            spokenWords.forEach(spoken => {
+                if (spoken.length < 1) return;
+
+                targetIndices.forEach(idx => {
+                    if (wordStates[idx] === 'correct') return;
+
+                    const cleanWord = words[idx].replace(/[^\w]/g, '').toLowerCase();
+
+                    // Relaxed Match: Exact match or similarity check for soft accents
+                    if (cleanWord === spoken || isSimilar(cleanWord, spoken)) {
+                        wordStates[idx] = 'correct';
+                        const el = document.getElementById(`word-${idx}`);
+                        if (el) {
+                            el.className = 'word correct';
+                        }
+                    }
+                });
+            });
+
+            updateScoreTracker();
+            checkParagraphCompletion();
+        }
+
+        // Simple Phonetic/Similarity Matcher (Relaxed for Indian Accent nuances)
+        function isSimilar(target, spoken) {
+            if (Math.abs(target.length - spoken.length) > 3) return false;
+            
+            // Handle common Indian English pronunciation variations
+            let t = target.replace(/v/g, 'w').replace(/ph/g, 'f').replace(/tion/g, 'shn');
+            let s = spoken.replace(/v/g, 'w').replace(/ph/g, 'f').replace(/tion/g, 'shn');
+
+            if (t === s) return true;
+
+            // Levenshtein distance check (max 2 character differences allowed)
+            let diff = 0;
+            let minLen = Math.min(t.length, s.length);
+            for (let i = 0; i < minLen; i++) {
+                if (t[i] !== s[i]) diff++;
+            }
+            diff += Math.abs(t.length - s.length);
+
+            return diff <= 2 && target.length > 3;
+        }
+
+        // Check if paragraph reading is finished
+        function checkParagraphCompletion() {
+            let activeIndices = isReviewMode ? mispronouncedIndices : words.map((_, i) => i);
+            let unread = activeIndices.filter(i => wordStates[i] !== 'correct');
+
+            if (unread.length === 0) {
+                // Completed all words in current mode!
+                stopRecognition();
+                playSuccessSound();
+
+                if (!isReviewMode) {
+                    // Check if there are any mispronounced/missed words to retry
+                    // If user finished reading, mark remaining pending as wrong
+                    // In continuous mode, if all turned green -> pure victory
+                    document.getElementById('success-modal').classList.remove('hidden');
+                } else {
+                    // Completed Review Mode successfully
+                    document.getElementById('success-modal').classList.remove('hidden');
+                }
+            }
+        }
+
+        // Transition to Practice Mispronounced Words (Red Words) Mode
+        function startReviewMode() {
+            mispronouncedIndices = wordStates
+                .map((state, idx) => (state !== 'correct' ? idx : -1))
+                .filter(idx => idx !== -1);
+
+            if (mispronouncedIndices.length === 0) {
+                document.getElementById('success-modal').classList.remove('hidden');
+                return;
+            }
+
+            isReviewMode = true;
+            document.getElementById('mode-badge').className = "bg-amber-100 text-amber-800 text-xs sm:text-sm font-semibold px-3 py-1 rounded-full flex items-center gap-2";
+            document.getElementById('mode-badge').innerHTML = '<i class="fa-solid fa-triangle-exclamation text-amber-600"></i> Retry Mispronounced Words Mode';
+
+            // Mark these indices as 'wrong' visually to start review
+            mispronouncedIndices.forEach(idx => {
+                wordStates[idx] = 'wrong';
+            });
+
+            renderWords();
+        }
+
+        // Toggle Microphone Listening
+        function toggleRecognition() {
+            if (!recognition) return;
+
+            if (isListening) {
+                stopRecognition();
+            } else {
+                startRecognition();
+            }
+        }
+
+        function startRecognition() {
+            try {
+                recognition.start();
+                isListening = true;
+                updateMicUI(true);
+            } catch (e) {
+                console.error(e);
+            }
+        }
+
+        function stopRecognition() {
+            if (recognition && isListening) {
+                isListening = false;
+                try { recognition.stop(); } catch(e) {}
+                updateMicUI(false);
+
+                // If stopped and there are remaining unread words, auto switch to retry mode if some words were attempted
+                const correctCount = wordStates.filter(s => s === 'correct').length;
+                if (correctCount > 0 && correctCount < words.length && !isReviewMode) {
+                    startReviewMode();
+                }
+            }
+        }
+
+        function updateMicUI(active) {
+            const btn = document.getElementById('btn-mic');
+            const icon = document.getElementById('mic-icon');
+            const text = document.getElementById('mic-text');
+            const status = document.getElementById('speech-status');
+
+            if (active) {
+                btn.className = "w-full sm:w-auto px-8 py-3.5 bg-red-600 hover:bg-red-700 text-white rounded-2xl font-bold shadow-lg transition flex items-center justify-center gap-3 text-base mic-active";
+                icon.className = "fa-solid fa-microphone-slash text-lg";
+                text.textContent = "Stop Reading";
+                status.innerHTML = '<span class="w-2.5 h-2.5 rounded-full bg-red-500 animate-ping"></span> <span class="text-red-600">Listening...</span>';
+            } else {
+                btn.className = "w-full sm:w-auto px-8 py-3.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-2xl font-bold shadow-lg transition flex items-center justify-center gap-3 text-base";
+                icon.className = "fa-solid fa-microphone text-lg";
+                text.textContent = "Start Reading";
+                status.innerHTML = '<span class="w-2 h-2 rounded-full bg-slate-400"></span> Mic Ready';
+            }
+        }
+
+        // Reset Current Paragraph
+        function resetParagraph() {
+            loadParagraph(currentParaIndex);
+        }
+
+        // Shuffle to Next/Random Paragraph
+        function shuffleParagraph() {
+            let nextIndex;
+            do {
+                nextIndex = Math.floor(Math.random() * paragraphs.length);
+            } while (nextIndex === currentParaIndex && paragraphs.length > 1);
+
+            loadParagraph(nextIndex);
+        }
+
+        // Text To Speech (TTS) for Listening Assistance ('en-IN' Accent)
+        function speakText() {
+            if ('speechSynthesis' in window) {
+                window.speechSynthesis.cancel(); // Stop any ongoing speech
+                const textToSpeak = isReviewMode 
+                    ? mispronouncedIndices.map(i => words[i]).join(', ')
+                    : paragraphs[currentParaIndex];
+
+                const utterance = new SpeechSynthesisUtterance(textToSpeak);
+                utterance.lang = 'en-IN';
+                utterance.rate = 0.85; // Slightly slower pace for Indian school students
+
+                // Try setting Indian accent voice if available on browser
+                const voices = window.speechSynthesis.getVoices();
+                const indianVoice = voices.find(v => v.lang.includes('en-IN') || v.name.includes('India'));
+                if (indianVoice) utterance.voice = indianVoice;
+
+                window.speechSynthesis.speak(utterance);
+            }
+        }
+
+        function speakSingleWord(word) {
+            if ('speechSynthesis' in window) {
+                window.speechSynthesis.cancel();
+                const utterance = new SpeechSynthesisUtterance(word);
+                utterance.lang = 'en-IN';
+                utterance.rate = 0.8;
+                window.speechSynthesis.speak(utterance);
+            }
+        }
+
+        // Success Sound Effect (AudioSynth / Web Audio API)
+        function playSuccessSound() {
+            try {
+                const ctx = new (window.AudioContext || window.webkitAudioContext)();
+                const notes = [261.63, 329.63, 392.00, 523.25]; // C4, E4, G4, C5
+                notes.forEach((freq, index) => {
+                    const osc = ctx.createOscillator();
+                    const gain = ctx.createGain();
+                    osc.frequency.value = freq;
+                    osc.connect(gain);
+                    gain.connect(ctx.destination);
+                    osc.start(ctx.currentTime + index * 0.1);
+                    gain.gain.exponentialRampToValueAtTime(0.00001, ctx.currentTime + index * 0.1 + 0.3);
+                    osc.stop(ctx.currentTime + index * 0.1 + 0.3);
+                });
+            } catch (e) {
+                console.log("Audio play error:", e);
+            }
+        }
+    </script>
+</body>
+</html>
